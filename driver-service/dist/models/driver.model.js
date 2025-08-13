@@ -36,53 +36,50 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const DriverSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
     phone: { type: String, required: true },
-    vehicleType: { type: String },
-    licenseNumber: { type: String },
+    vehicleType: { type: String, default: '' },
+    licenseNumber: { type: String, default: '' },
     status: {
         type: String,
         enum: ['pending', 'approved', 'suspended'],
         default: 'pending',
     },
-    kyc: {
+    kycStatus: {
+        type: String,
+        enum: ['pending', 'processing', 'confirmed', 'rejected'],
+        default: 'pending',
+    },
+    kycData: {
+        location: { type: String },
+        address: { type: String },
+        officeAddress: { type: String },
         dateOfBirth: { type: Date },
-        residentialAddress: { type: String },
-        nin: { type: String },
-        vehicleType: { type: String },
-        licenseNumber: { type: String },
-        photoId: { type: String },
+        gender: { type: String, enum: ['male', 'female', 'other'] },
         selfie: { type: String },
-        driverLicense: {
-            number: { type: String },
-            category: { type: String },
-            issueDate: { type: Date },
-            expiryDate: { type: Date },
-        },
-        vehicle: {
-            registrationDocument: { type: String },
-            make: { type: String },
-            model: { type: String },
-            year: { type: Number },
-            insuranceDocument: { type: String },
-            inspectionCertificate: { type: String },
-            licensePlate: { type: String },
-        },
-        banking: {
-            accountNumber: { type: String },
-            bankName: { type: String },
-            sortCodeOrIBAN: { type: String },
-            tin: { type: String },
-            vatNumber: { type: String },
-        },
-        kycStatus: {
-            type: String,
-            enum: ['incomplete', 'pending', 'verified', 'rejected'],
-            default: 'incomplete',
+        driversLicense: { type: String },
+        vehicleInformation: { type: String },
+        vehicleInspectionDocument: { type: String },
+        availabilityDays: [
+            {
+                type: String,
+                enum: [
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                    'Sunday',
+                ],
+            },
+        ],
+        categories: {
+            type: [String],
         },
     },
-});
+}, { timestamps: true });
 // Remove existing index on licenseNumber if it exists
 DriverSchema.index({ licenseNumber: 1 }, { unique: false, sparse: false });
 // Ensure unique index on kyc.licenseNumber when set

@@ -168,7 +168,7 @@ export const confirmOtp = async (
       })
       await driver.save()
       const token = jwt.sign(
-        { id: driver?._id.toString(), email },
+        { id: driver?._id, email },
         process.env.JWT_SECRET!,
         { expiresIn: '7d' }
       )
@@ -180,7 +180,7 @@ export const confirmOtp = async (
         data: {
           token,
           driver: {
-            id: driver?._id.toString(),
+            id: driver?._id,
             name: driver.name,
             email: driver.email,
             phone: driver.phone,
@@ -197,7 +197,7 @@ export const confirmOtp = async (
         } as ApiResponse)
       }
       const resetToken = jwt.sign(
-        { id: driver._id.toString(), email },
+        { id: driver._id, email },
         process.env.JWT_SECRET!,
         { expiresIn: '15m' }
       )
@@ -418,6 +418,12 @@ export const login = async (req: AuthRequest, res: Response) => {
       } as ApiResponse)
     }
     if (isDriver) {
+      if (!driver) {
+        return res.status(404).json({
+          statusCode: '05',
+          error: 'Invalid credentials',
+        } as ApiResponse)
+      }
       const isMatch = await bcrypt.compare(password, driver.password)
       if (!isMatch) {
         return res.status(401).json({
@@ -443,7 +449,7 @@ export const login = async (req: AuthRequest, res: Response) => {
             vehicleType: driver.vehicleType,
             licenseNumber: driver.licenseNumber,
             status: driver.status,
-            kycStatus: driver.kyc.kycStatus,
+            kycStatus: driver.kycStatus,
           },
         },
       } as ApiResponse)
@@ -667,6 +673,40 @@ export const getKyc = async (
     return res.status(500).json({
       statusCode: '01',
       error: 'Internal server error during KYC retrieval',
+    } as ApiResponse)
+  }
+}
+
+export const confirmKyc = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { driverId, kycStatus } = req.body
+    const driver = await Driver.findById(driverId)
+    if (!driver) {
+      return res.status(404).json({
+        statusCode: '05',
+        error: 'Driver not found',
+      } as ApiResponse)
+    }
+    if (driver.kycStatus !== 'processing') {
+      return res.status(400).json({
+        statusCode: '01',
+        error: 'KYC is not in processing state',
+      } as ApiResponse)
+    }
+    driver.kycStatus = kycStatus
+    await driver.save()
+    return res.status(200).json({
+      statusCode: '00',
+      message: 'KYC status updated successfully',
+      data: { kycStatus: driver.kycStatus },
+    } as ApiResponse)
+  } catch (error) {
+    return res.status(500).json({
+      statusCode: '01',
+      error: 'Internal server error during KYC confirmation',
     } as ApiResponse)
   }
 }

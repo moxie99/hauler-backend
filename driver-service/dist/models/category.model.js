@@ -34,18 +34,21 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const OtpSchema = new mongoose_1.Schema({
-    email: { type: String, required: true, unique: true },
-    otp: { type: String, required: true },
-    expiresAt: { type: Date, required: true, index: { expires: '5m' } },
-    lastSent: { type: Date, required: true },
-    isValid: { type: Boolean, required: true, default: true },
-    purpose: {
+const categorySchema = new mongoose_1.Schema({
+    name: {
         type: String,
-        enum: ['registration', 'password_reset', 'confirm_onboarding'],
         required: true,
+        unique: true,
+        index: true,
+        trim: true, // removes leading/trailing spaces
     },
-});
-// Automatically remove expired OTPs
-OtpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-exports.default = mongoose_1.default.model('Otp', OtpSchema);
+    description: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+}, { timestamps: true });
+// Avoid model overwrite issues in dev/hot-reload
+const Category = mongoose_1.default.models.Category ||
+    mongoose_1.default.model('Category', categorySchema);
+exports.default = Category;

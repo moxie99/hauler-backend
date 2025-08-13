@@ -9,7 +9,10 @@ const authenticate = (req, res, next) => {
     var _a;
     const token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.replace('Bearer ', '');
     if (!token) {
-        return res.status(401).json({ error: 'Access denied, no token provided' });
+        return res.status(401).json({
+            statusCode: '04',
+            error: 'Access denied, no token provided',
+        });
     }
     try {
         const decoded = jsonwebtoken_1.default.verify(token, 'your_jwt_secret');
@@ -18,7 +21,9 @@ const authenticate = (req, res, next) => {
         next();
     }
     catch (error) {
-        res.status(401).json({ error: 'Invalid token' });
+        res
+            .status(401)
+            .json({ statusCode: '04', error: 'Invalid token' });
     }
 };
 exports.authenticate = authenticate;

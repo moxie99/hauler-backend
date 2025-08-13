@@ -13,6 +13,7 @@ import {
   getPendingDrivers,
   forgotPassword,
   resetPassword,
+  confirmKyc,
 } from '../controllers/driver.controller'
 import { authenticate } from '../middleware/auth.middleware'
 import { validateRequest } from '../middleware/validate.middleware'
@@ -125,18 +126,19 @@ router.put(
   validateRequest,
   updateStatus
 )
-router.post(
+router.put(
   '/kyc/confirm',
   authenticate,
   [
     body('driverId').notEmpty().withMessage('Driver ID is required'),
     body('kycStatus')
-      .isIn(['confirmed', 'rejected'])
+      .isIn(['approved', 'rejected'])
       .withMessage('Invalid KYC status'),
   ],
   validateRequest,
   confirmKyc
 )
+
 router.post(
   '/kyc',
   authenticate,

@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose'
+import mongoose, { Schema, Document, Model } from 'mongoose'
 
-export interface ICategory extends mongoose.Document {
+export interface ICategory extends Document {
   name: string
   description: string
 }
@@ -12,13 +12,20 @@ const categorySchema = new Schema<ICategory>(
       required: true,
       unique: true,
       index: true,
+      trim: true, // removes leading/trailing spaces
     },
     description: {
       type: String,
       required: true,
+      trim: true,
     },
   },
   { timestamps: true }
 )
 
-export default mongoose.model<ICategory>('Category', categorySchema)
+// Avoid model overwrite issues in dev/hot-reload
+const Category: Model<ICategory> =
+  mongoose.models.Category ||
+  mongoose.model<ICategory>('Category', categorySchema)
+
+export default Category

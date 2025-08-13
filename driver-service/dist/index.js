@@ -17,10 +17,12 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const driver_routes_1 = __importDefault(require("../src/routes/driver.routes"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cleanup_1 = require("./utils/cleanup");
+const category_routes_1 = __importDefault(require("../src/routes/category.routes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use('/api/drivers', driver_routes_1.default);
+app.use('/api', category_routes_1.default);
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield mongoose_1.default.connect(process.env.MONGODB_URI_DRIVER ||
